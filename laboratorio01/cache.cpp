@@ -3,7 +3,7 @@
 #define msg(str,str2) cout << str << str2<< endl
 using namespace std;
 
-const int MAX = 1e4;
+const int MAX = 4096;
 int A[MAX][MAX];
 int lineal[MAX];
 int container01[MAX];
