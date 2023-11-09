@@ -3,7 +3,7 @@
 #include<mpi.h>
 
 
-struct Pan Func(int local_a, int local_b, int my_rank, int local_n);
+struct Gatos Func(int local_a, int local_b, int my_rank, int local_n);
 
 
 struct Pair{
@@ -68,6 +68,50 @@ MPI_Datatype createPanMPIType() {
 }
 
 
+struct Monos {
+    int *a;
+    float *b;
+    int *c;
+};
+MPI_Datatype createMonosMPIType() {
+    MPI_Datatype mpiMonos;
+    int blocklengths[3] = {1, 1, 1}; // Número de elementos en cada bloque
+    MPI_Datatype types[3] = {MPI_INT, MPI_FLOAT, MPI_INT}; // Tipo de dato de cada elemento
+    MPI_Aint offsets[3]; // Desplazamiento en bytes desde el inicio de la estructura
+
+    offsets[0] = offsetof(struct Monos, a);
+    offsets[1] = offsetof(struct Monos, b);
+    offsets[2] = offsetof(struct Monos, c);
+
+    MPI_Type_create_struct(3, blocklengths, offsets, types, &mpiMonos);
+    MPI_Type_commit(&mpiMonos);
+
+    return mpiMonos;
+}
+
+struct Gatos {
+    int patas[4];
+    float colores[2];
+};
+
+MPI_Datatype createGatosMPIType() {
+    MPI_Datatype mpiGatos;
+    int block_lengths[2] = {4, 2};  // Número de elementos en cada parte de la estructura
+    MPI_Datatype types[2] = {MPI_INT, MPI_FLOAT};  // Tipos de datos de cada parte de la estructura
+    MPI_Aint offsets[2];  // Desplazamientos de cada parte de la estructura
+
+    // Calcula los desplazamientos de cada parte en la estructura Gatos
+    offsets[0] = 0;
+    offsets[1] = sizeof(int) * 4;  // Desplazamiento de la segunda parte
+
+    // Crea el tipo de dato MPI personalizado para Gatos
+    MPI_Type_create_struct(2, block_lengths, offsets, types, &mpiGatos);
+    MPI_Type_commit(&mpiGatos);
+
+    return mpiGatos;
+}
+
+
 int main(){
 	int my_rank, comm_sz;
 	int a = 0, local_a, local_b;
@@ -84,19 +128,30 @@ int main(){
 	
 	MPI_Datatype mpiPair = createPairMPIType(); // Crear el tipo de dato MPI personalizado
 	MPI_Datatype mpiPan = createPanMPIType();
+	MPI_Datatype mpiMonos = createMonosMPIType();
+	MPI_Datatype mpiGatos = createGatosMPIType();
 	// struct Pair temp;
-	struct Pan temp;
+	struct Gatos temp;
 	temp = Func(local_a, local_b, my_rank,local_n);
 	if(my_rank != 0){
 		// printf("myrank != 0\n");
 		// printf("%d %d %d\n", pan.x, pan.y, pan.z);
-		int send_result = MPI_Send(&temp, 1, mpiPan, 0, 0, MPI_COMM_WORLD);
+		int send_result = MPI_Send(&temp, 1, mpiGatos, 0, 0, MPI_COMM_WORLD);
         if (send_result != MPI_SUCCESS) {
             fprintf(stderr, "Error en MPI_Send en el proceso %d\n", my_rank);
             MPI_Abort(MPI_COMM_WORLD, 1); // Abortar todos los procesos
         }
 	}else{
-		printf("%d %d %d\n", temp.x, temp.y, temp.z);
+		printf("printf patas\n");
+		for(int e = 0 ;e < 4; e++){
+			printf("%d ",temp.patas[e]);
+		}printf("\n");
+		printf("printf colores\n");
+		for(int e = 0 ;e < 2; e++){
+			printf("%f ",temp.colores[e]);
+		}printf("\n");
+
+		// printf("%d %f %d\n", temp.a, temp.b, temp.c);
 		// printf("\nin else antes for\n");
 		// printf("viendo lo que hay en temp: \n");
 		// printf("%d\n", temp.first);
@@ -105,7 +160,7 @@ int main(){
 		// }printf("\n");
 		for(int source = 1; source < comm_sz; source++){
 			// struct Pan algo;
-			int recv_result = MPI_Recv(&temp, 1, mpiPan, source, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+			int recv_result = MPI_Recv(&temp, 1, mpiGatos, source, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             if (recv_result != MPI_SUCCESS) {
                 fprintf(stderr, "Error en MPI_Recv en el proceso %d\n", my_rank);
                 MPI_Abort(MPI_COMM_WORLD, 1); // Abortar todos los procesos
@@ -121,7 +176,16 @@ int main(){
             //     printf("NULL");
             // }
             // printf("\n");
-			printf("%d %d %d\n", temp.x, temp.y, temp.z);
+			// printf("%d %f %d\n", temp.a[0], temp.b[0], *temp.c[0]);
+
+			printf("printf patas\n");
+			for(int e = 0 ;e < 4; e++){
+				printf("%d ",temp.patas[e]);
+			}printf("\n");
+			printf("printf colores\n");
+			for(int e = 0 ;e < 2; e++){
+				printf("%f ",temp.colores[e]);
+			}printf("\n");
 
 		}
 	}
@@ -131,7 +195,7 @@ int main(){
 
 
 
-struct Pan Func(int local_a, int local_b, int my_rank, int local_n){
+struct Gatos Func(int local_a, int local_b, int my_rank, int local_n){
 	struct Pair p;
 	p.first = my_rank;
 	int position = 0;
@@ -156,10 +220,30 @@ struct Pan Func(int local_a, int local_b, int my_rank, int local_n){
 	// 	printf("%d ", p.vec[e]);
 	// }printf("\n");
 
-	struct Pan pan;
-	pan.x = my_rank+10;
-	pan.y = my_rank+11;
-	pan.z = my_rank+12;
-	return pan;
+	// struct Pan pan;
+	// pan.x = my_rank+10;
+	// pan.y = my_rank+11;
+	// pan.z = my_rank+12;
+	// return pan;
+
+	// struct Monos myMonos;
+	// myMonos.a = malloc(sizeof(int));
+	// *myMonos.a = my_rank+100;  // Ejemplo de asignación para 'a'
+
+	// myMonos.b = malloc(sizeof(float));
+	// *myMonos.b = my_rank+112.78;  // Ejemplo de asignación para 'b'
+
+	// myMonos.c = malloc(sizeof(int));
+	// *myMonos.c = my_rank+120; 
+	// return myMonos;
+	struct Gatos miGato;
+	miGato.patas[0] = my_rank+4;;
+    miGato.patas[1] = my_rank+4;
+    miGato.patas[2] = my_rank+4;
+    miGato.patas[3] = my_rank+4;
+
+    miGato.colores[0] = 0.5;  // Por ejemplo, color 1
+    miGato.colores[1] = 0.8;
+	return miGato;
 	// return p;
 }
