@@ -109,7 +109,7 @@ void Read_matrix(
 }  /* Read_matrix */
 
 /*-------------------------------------------------------------------
- * Function:   Read_matrix
+ * Function:   Read_vector
  * Purpose:    Read a vector from stdin
  * In args:    prompt:  description of matrix
  *             n:       order of matrix
