@@ -3,7 +3,7 @@
 #include<mpi.h>
 
 
-struct Leones Func(int local_a, int local_b, int my_rank, int local_n);
+struct Pair Func(int local_a, int local_b, int my_rank, int local_n);
 
 int local_n;
 
@@ -32,6 +32,7 @@ int M[R][C] = {
 int V[R] = {2, 5, 6, 7, 8, 3, 7, 5, 9, 2};
 // Función para crear un tipo de dato MPI personalizado para la estructura Pair
 MPI_Datatype createPairMPIType() {
+	// printf("local-n in datatype %d\n", local_n); //ok
     MPI_Datatype mpiPair;
     int blocklengths[2] = {1, local_n};
     MPI_Datatype types[2] = {MPI_INT, MPI_INT};
@@ -153,6 +154,7 @@ MPI_Datatype createLeonesMPIType() {
     return mpiLeones;
 }
 
+
 int main(){
 	int my_rank, comm_sz;
 	int a = 0, local_a, local_b;
@@ -173,12 +175,12 @@ int main(){
 	MPI_Datatype mpiGatos = createGatosMPIType();
 	MPI_Datatype mpiLeones = createLeonesMPIType();
 	// struct Pair temp;
-	struct Leones temp;
+	struct Pair temp;
 	temp = Func(local_a, local_b, my_rank,local_n);
 	if(my_rank != 0){
 		// printf("myrank != 0\n");
 		// printf("%d %d %d\n", pan.x, pan.y, pan.z);
-		int send_result = MPI_Send(&temp, 1, mpiLeones, 0, 0, MPI_COMM_WORLD);
+		int send_result = MPI_Send(&temp, 1, mpiPair, 0, 0, MPI_COMM_WORLD);
         if (send_result != MPI_SUCCESS) {
             fprintf(stderr, "Error en MPI_Send en el proceso %d\n", my_rank);
             MPI_Abort(MPI_COMM_WORLD, 1); // Abortar todos los procesos
@@ -202,11 +204,11 @@ int main(){
 		// 	printf("%f ",temp.varios[e]);
 		// }printf("\n");
 
-		printf("printf leones\n");
-		printf("%d\n", temp.fuerza);
-		for(int e = 0; e < 2 ; e++){
-			printf("%d ", temp.colores[e]);
-		}printf("\n");
+		// printf("printf leones\n");
+		// printf("%d\n", temp.fuerza);
+		// for(int e = 0; e < 2 ; e++){
+		// 	printf("%d ", temp.colores[e]);
+		// }printf("\n");
 
 
 		
@@ -214,13 +216,15 @@ int main(){
 		// printf("%d %f %d\n", temp.a, temp.b, temp.c);
 		// printf("\nin else antes for\n");
 		// printf("viendo lo que hay en temp: \n");
-		// printf("%d\n", temp.first);
-		// for(int e = 0 ;e < local_n ; e++){
-		// 	printf("%d ", temp.vec[e]);
-		// }printf("\n");
+
+		printf("%d\n", temp.first);
+		for(int e = 0 ;e < local_n ; e++){
+			printf("%d ", temp.vec[e]);
+		}printf("\n");
+
 		for(int source = 1; source < comm_sz; source++){
 			// struct Pan algo;
-			int recv_result = MPI_Recv(&temp, 1, mpiLeones, source, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+			int recv_result = MPI_Recv(&temp, 1, mpiPair, source, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             if (recv_result != MPI_SUCCESS) {
                 fprintf(stderr, "Error en MPI_Recv en el proceso %d\n", my_rank);
                 MPI_Abort(MPI_COMM_WORLD, 1); // Abortar todos los procesos
@@ -247,11 +251,11 @@ int main(){
 			// 	printf("%f ",temp.varios[e]);
 			// }printf("\n");
 
-			printf("printf leones\n");
-			printf("%d\n", temp.fuerza);
-			for(int e = 0; e < 2 ; e++){
-				printf("%d ", temp.colores[e]);
-			}printf("\n");
+			// printf("printf leones\n");
+			// printf("%d\n", temp.fuerza);
+			// for(int e = 0; e < 2 ; e++){
+			// 	printf("%d ", temp.colores[e]);
+			// }printf("\n");
 
 
 			// printf("printf vec\n");
@@ -259,6 +263,11 @@ int main(){
 			// for(int e = 0; e < local_n ; e++){
 			// 	printf("%d ", temp.vec[e]);
 			// }
+
+			printf("%d\n", temp.first);
+			for(int e = 0 ;e < local_n ; e++){
+				printf("%d ", temp.vec[e]);
+			}printf("\n");
 
 		}
 	}
@@ -268,7 +277,7 @@ int main(){
 
 
 
-struct Leones Func(int local_a, int local_b, int my_rank, int local_n){
+struct Pair Func(int local_a, int local_b, int my_rank, int local_n){
 	struct Pair p;
 	p.first = my_rank;
 	int position = 0;
@@ -328,10 +337,10 @@ struct Leones Func(int local_a, int local_b, int my_rank, int local_n){
 	//  delfines.varios[3] = my_rank+15;
 	//  return delfines;
 
-	struct Leones leon;
-	leon.fuerza = my_rank;
-	leon.colores[0] = my_rank+1;
-	leon.colores[1] =my_rank +2;
-	return leon;
-	// return p;
+	// struct Leones leon;
+	// leon.fuerza = my_rank;
+	// leon.colores[0] = my_rank+1;
+	// leon.colores[1] =my_rank +2;
+	// return leon;
+	return p;
 }
