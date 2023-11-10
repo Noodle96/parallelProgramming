@@ -4,7 +4,7 @@
  *           one-dimensional arrays to store the vectors and the
  *           matrix.
  *
- * Compile:  gcc -g -Wall -o mat_vect_mult mat_vect_mult.c
+ * Compile:  gcc -g -Wall -o mat_vect_mult mat_vect_mult.c -DDEBUG
  * Run:      ./mat_vect_mult
  *
  * Input:    Dimensions of the matrix (m = number of rows, n
