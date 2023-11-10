@@ -3,8 +3,9 @@
 #include<mpi.h>
 
 
-struct Gatos Func(int local_a, int local_b, int my_rank, int local_n);
+struct Leones Func(int local_a, int local_b, int my_rank, int local_n);
 
+int local_n;
 
 struct Pair{
 	int first;
@@ -29,7 +30,6 @@ int M[R][C] = {
 };
 
 int V[R] = {2, 5, 6, 7, 8, 3, 7, 5, 9, 2};
-int local_n;
 // Función para crear un tipo de dato MPI personalizado para la estructura Pair
 MPI_Datatype createPairMPIType() {
     MPI_Datatype mpiPair;
@@ -41,7 +41,7 @@ MPI_Datatype createPairMPIType() {
     offsets[1] = offsetof(struct Pair, vec);
 
     MPI_Type_create_struct(2, blocklengths, offsets, types, &mpiPair);
-	MPI_Type_contiguous(local_n, MPI_INT, &mpiPair);
+	// MPI_Type_contiguous(local_n, MPI_INT, &mpiPair);
     MPI_Type_commit(&mpiPair);
 
     return mpiPair;
@@ -111,6 +111,47 @@ MPI_Datatype createGatosMPIType() {
     return mpiGatos;
 }
 
+struct Delgfines {
+    int algo[2];
+    int varios[4];
+};
+MPI_Datatype createDelgfinesMPIType() {
+    MPI_Datatype mpiDelgfines;
+    int blocklengths[2] = {2, 4};  // Cantidad de elementos en cada campo
+    MPI_Datatype types[2] = {MPI_INT, MPI_INT};  // Tipos de datos de cada campo
+    MPI_Aint offsets[2];  // Desplazamientos de cada campo
+
+    offsets[0] = offsetof(struct Delgfines, algo);  // Desplazamiento del campo algo
+    offsets[1] = offsetof(struct Delgfines, varios);  // Desplazamiento del campo varios
+
+    // Crear el nuevo tipo de dato MPI
+    MPI_Type_create_struct(2, blocklengths, offsets, types, &mpiDelgfines);
+    MPI_Type_commit(&mpiDelgfines);
+
+    return mpiDelgfines;
+}
+
+
+struct Leones {
+    int fuerza;
+    int colores[2];
+};
+
+MPI_Datatype createLeonesMPIType() {
+    MPI_Datatype mpiLeones;
+    int blocklengths[2] = {1, 2};  // Cantidad de elementos en cada campo
+    MPI_Datatype types[2] = {MPI_INT, MPI_INT};  // Tipos de datos de cada campo
+    MPI_Aint offsets[2];  // Desplazamientos de cada campo
+
+    offsets[0] = offsetof(struct Leones, fuerza);  // Desplazamiento del campo fuerza
+    offsets[1] = offsetof(struct Leones, colores);  // Desplazamiento del campo colores
+
+    // Crear el nuevo tipo de dato MPI
+    MPI_Type_create_struct(2, blocklengths, offsets, types, &mpiLeones);
+    MPI_Type_commit(&mpiLeones);
+
+    return mpiLeones;
+}
 
 int main(){
 	int my_rank, comm_sz;
@@ -130,26 +171,45 @@ int main(){
 	MPI_Datatype mpiPan = createPanMPIType();
 	MPI_Datatype mpiMonos = createMonosMPIType();
 	MPI_Datatype mpiGatos = createGatosMPIType();
+	MPI_Datatype mpiLeones = createLeonesMPIType();
 	// struct Pair temp;
-	struct Gatos temp;
+	struct Leones temp;
 	temp = Func(local_a, local_b, my_rank,local_n);
 	if(my_rank != 0){
 		// printf("myrank != 0\n");
 		// printf("%d %d %d\n", pan.x, pan.y, pan.z);
-		int send_result = MPI_Send(&temp, 1, mpiGatos, 0, 0, MPI_COMM_WORLD);
+		int send_result = MPI_Send(&temp, 1, mpiLeones, 0, 0, MPI_COMM_WORLD);
         if (send_result != MPI_SUCCESS) {
             fprintf(stderr, "Error en MPI_Send en el proceso %d\n", my_rank);
             MPI_Abort(MPI_COMM_WORLD, 1); // Abortar todos los procesos
         }
 	}else{
-		printf("printf patas\n");
-		for(int e = 0 ;e < 4; e++){
-			printf("%d ",temp.patas[e]);
+		// printf("printf patas\n");
+		// for(int e = 0 ;e < 4; e++){
+		// 	printf("%d ",temp.patas[e]);
+		// }printf("\n");
+		// printf("printf colores\n");
+		// for(int e = 0 ;e < 2; e++){
+		// 	printf("%f ",temp.colores[e]);
+		// }printf("\n");
+
+		// printf("printf algo\n");
+		// for(int e = 0 ;e < 2; e++){
+		// 	printf("%d ",temp.algo[e]);
+		// }printf("\n");
+		// printf("printf varios\n");
+		// for(int e = 0 ;e < 4; e++){
+		// 	printf("%f ",temp.varios[e]);
+		// }printf("\n");
+
+		printf("printf leones\n");
+		printf("%d\n", temp.fuerza);
+		for(int e = 0; e < 2 ; e++){
+			printf("%d ", temp.colores[e]);
 		}printf("\n");
-		printf("printf colores\n");
-		for(int e = 0 ;e < 2; e++){
-			printf("%f ",temp.colores[e]);
-		}printf("\n");
+
+
+		
 
 		// printf("%d %f %d\n", temp.a, temp.b, temp.c);
 		// printf("\nin else antes for\n");
@@ -160,7 +220,7 @@ int main(){
 		// }printf("\n");
 		for(int source = 1; source < comm_sz; source++){
 			// struct Pan algo;
-			int recv_result = MPI_Recv(&temp, 1, mpiGatos, source, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+			int recv_result = MPI_Recv(&temp, 1, mpiLeones, source, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             if (recv_result != MPI_SUCCESS) {
                 fprintf(stderr, "Error en MPI_Recv en el proceso %d\n", my_rank);
                 MPI_Abort(MPI_COMM_WORLD, 1); // Abortar todos los procesos
@@ -178,14 +238,27 @@ int main(){
             // printf("\n");
 			// printf("%d %f %d\n", temp.a[0], temp.b[0], *temp.c[0]);
 
-			printf("printf patas\n");
-			for(int e = 0 ;e < 4; e++){
-				printf("%d ",temp.patas[e]);
+			// printf("printf algo\n");
+			// for(int e = 0 ;e < 2; e++){
+			// 	printf("%d ",temp.algo[e]);
+			// }printf("\n");
+			// printf("printf varios\n");
+			// for(int e = 0 ;e < 4; e++){
+			// 	printf("%f ",temp.varios[e]);
+			// }printf("\n");
+
+			printf("printf leones\n");
+			printf("%d\n", temp.fuerza);
+			for(int e = 0; e < 2 ; e++){
+				printf("%d ", temp.colores[e]);
 			}printf("\n");
-			printf("printf colores\n");
-			for(int e = 0 ;e < 2; e++){
-				printf("%f ",temp.colores[e]);
-			}printf("\n");
+
+
+			// printf("printf vec\n");
+			// printf("local_n %d\n", local_n);
+			// for(int e = 0; e < local_n ; e++){
+			// 	printf("%d ", temp.vec[e]);
+			// }
 
 		}
 	}
@@ -195,7 +268,7 @@ int main(){
 
 
 
-struct Gatos Func(int local_a, int local_b, int my_rank, int local_n){
+struct Leones Func(int local_a, int local_b, int my_rank, int local_n){
 	struct Pair p;
 	p.first = my_rank;
 	int position = 0;
@@ -236,14 +309,29 @@ struct Gatos Func(int local_a, int local_b, int my_rank, int local_n){
 	// myMonos.c = malloc(sizeof(int));
 	// *myMonos.c = my_rank+120; 
 	// return myMonos;
-	struct Gatos miGato;
-	miGato.patas[0] = my_rank+4;;
-    miGato.patas[1] = my_rank+4;
-    miGato.patas[2] = my_rank+4;
-    miGato.patas[3] = my_rank+4;
+	// struct Gatos miGato;
+	// miGato.patas[0] = my_rank+4;;
+    // miGato.patas[1] = my_rank+4;
+    // miGato.patas[2] = my_rank+4;
+    // miGato.patas[3] = my_rank+4;
 
-    miGato.colores[0] = 0.5;  // Por ejemplo, color 1
-    miGato.colores[1] = 0.8;
-	return miGato;
+    // miGato.colores[0] = 0.5;  // Por ejemplo, color 1
+    // miGato.colores[1] = 0.8;
+	// return miGato;
+	//  struct Delgfines delfines;
+	//  delfines.algo[0] = my_rank+10;
+	//  delfines.algo[1] = my_rank+11;
+
+	//  delfines.varios[0] = my_rank+12;
+	//  delfines.varios[1] = my_rank+13;
+	//  delfines.varios[2] = my_rank+14;
+	//  delfines.varios[3] = my_rank+15;
+	//  return delfines;
+
+	struct Leones leon;
+	leon.fuerza = my_rank;
+	leon.colores[0] = my_rank+1;
+	leon.colores[1] =my_rank +2;
+	return leon;
 	// return p;
 }
