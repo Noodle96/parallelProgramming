@@ -30,6 +30,7 @@ const int MAX_THREADS = 1024;
 long thread_count;
 long long n;
 double sum;
+double * sumasIndividuales = NULL;
 
 void* Thread_sum(void* rank);
 
@@ -45,6 +46,9 @@ int main(int argc, char* argv[]) {
    /* Get number of threads from command line */
    Get_args(argc, argv);
 
+   // sumasIndividuales[i] sera la suma calculada por el rank = i
+   sumasIndividuales = malloc(thread_count*sizeof(double));
+
    thread_handles = (pthread_t*) malloc (thread_count*sizeof(pthread_t)); 
    sum = 0.0;
 
@@ -53,15 +57,27 @@ int main(int argc, char* argv[]) {
           Thread_sum, (void*)thread);  
 
    for (thread = 0; thread < thread_count; thread++) 
-      pthread_join(thread_handles[thread], NULL); 
+      pthread_join(thread_handles[thread], NULL);
+
+   ////////////////////////////////////////////////////////////////////////
+   // ACUMULAR cada sumasIndividuales[i]
+   double mySum = 0.0;
+   for(int e = 0 ;e < thread_count ; e++){
+      // printf("SUma temporal en for: %.15f\n", sumasIndividuales[e]);
+      mySum += sumasIndividuales[e];
+   }
+   mySum *=4.0;
+   ////////////////////////////////////////////////////////////////////////
 
    sum = 4.0*sum;
    printf("With n = %lld terms,\n", n);
+   printf("My Sum: %.15f\n", mySum);
    printf("   Our estimate of pi = %.15f\n", sum);
    sum = Serial_pi(n);
    printf("   Single thread est  = %.15f\n", sum);
    printf("                   pi = %.15f\n", 4.0*atan(1.0));
    
+   free(sumasIndividuales);
    free(thread_handles);
    return 0;
 }  /* main */
@@ -81,6 +97,7 @@ void* Thread_sum(void* rank) {
    long long my_n = n/thread_count;
    long long my_first_i = my_n*my_rank;
    long long my_last_i = my_first_i + my_n;
+   double sumIndividual = 0.0;
 
    if (my_first_i % 2 == 0)
       factor = 1.0;
@@ -88,9 +105,11 @@ void* Thread_sum(void* rank) {
       factor = -1.0;
 
    for (i = my_first_i; i < my_last_i; i++, factor = -factor) {
+      sumIndividual += factor/(2*i+1);
       sum += factor/(2*i+1);  
    }
-
+   // printf("Suma temporal %.15f\n", sumIndividual);
+   sumasIndividuales[my_rank] = sumIndividual;
    return NULL;
 }  /* Thread_sum */
 
