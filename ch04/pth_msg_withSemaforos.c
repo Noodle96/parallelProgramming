@@ -64,6 +64,20 @@ int main(int argc, char* argv[]) {
       pthread_join(thread_handles[thread], NULL);
    }
 
+
+   //test
+   // The semaphore[i] are all 0
+   int value;
+   printf("printf the value of semaphore[i]\n");
+   for(int e = 0 ;  e < thread_count;e++){
+      // printf("data %p\n", (void *)&semaphores[e]);
+      // printf("El valor del tercer semáforo es: %p\n", (void *)&semaphores[e]);
+      sem_getvalue(&semaphores[e], &value);
+
+       // Imprimir el valor del tercer semáforo
+      printf("El valor del semáforo es: %d\n", value);
+   }
+
    ////////////////// DESTRUIR MESSAGES AND SEMAPHIORES ///////////////
    for (thread = 0; thread < thread_count; thread++) {
       free(messages[thread]);
@@ -110,6 +124,12 @@ void *Send_msg(void* rank) {
    sprintf(my_msg, "Hello to %ld from %ld", dest, my_rank);
    messages[dest] = my_msg;
    sem_post(&semaphores[dest]);  /* "Unlock" the semaphore of dest */
+
+   // int value;
+   // sem_getvalue(&semaphores[dest], &value);
+
+   //     // Imprimir el valor del tercer semáforo
+   // printf("El valor dentro del semáforo es: %d\n", value);// aqui el valor del semaforo es 1
 
    sem_wait(&semaphores[my_rank]);  /* Wait for our semaphore to be unlocked */
    printf("Thread %ld > %s\n", my_rank, messages[my_rank]);
