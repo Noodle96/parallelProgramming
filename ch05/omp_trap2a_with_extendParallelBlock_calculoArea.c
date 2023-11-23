@@ -31,7 +31,7 @@ int main(int argc, char* argv[]) {
    double  a, b;                 /* Left and right endpoints      */
    int     n;                    /* Total number of trapezoids    */
    int     thread_count;
-
+   double my_result;
    if (argc != 2) Usage(argv[0]);
    thread_count = strtol(argv[1], NULL, 10);
    printf("Enter a, b, and n\n");
@@ -39,9 +39,10 @@ int main(int argc, char* argv[]) {
    if (n % thread_count != 0) Usage(argv[0]);
 
    global_result = 0.0;
-#  pragma omp parallel num_threads(thread_count) 
+#  pragma omp parallel num_threads(thread_count) private(my_result)
    {
-      double my_result = 0.0;
+      // double my_result = 0.0;
+      my_result = 0.0;
       my_result += Local_trap(a, b, n);
 #     pragma omp critical
       global_result += my_result;
