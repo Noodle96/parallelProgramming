@@ -86,7 +86,10 @@ double Trap(double a, double b, int n, int thread_count) {
    int  i;
 
    h = (b-a)/n; 
-   approx = (f(a) + f(b))/2.0; 
+   approx = (f(a) + f(b))/2.0;
+   /*
+      ! No hay forma de no trabajar con la clause reduction
+   */
 #  pragma omp parallel for num_threads(thread_count) \
       reduction(+: approx)
    for (i = 1; i <= n-1; i++)
