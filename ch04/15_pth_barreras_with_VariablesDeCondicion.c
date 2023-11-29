@@ -112,8 +112,8 @@ void *Thread_work(void* rank) {
          // Put wait in while loop in case some other event awakens thread.
          // Ponga esperar en el bucle while en caso de que algún otro evento despierte el hilo.
          while (pthread_cond_wait(&ok_to_proceed,
-                   &barrier_mutex) != 0);
-         // Mutex is relocked at this point.
+                   &barrier_mutex) != 0); // DUERME EL HILO ACTUAL Y UNLOCK THE MUTEX
+         // Mutex is relocked at this point. // mutex esta bloqueado en este punto
 #        ifdef DEBUG
          printf("Thread %ld > Awakened in barrier %d\n", my_rank, i);
          fflush(stdout);
