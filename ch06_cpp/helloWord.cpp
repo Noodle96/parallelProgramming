@@ -1,3 +1,8 @@
+/*
+	^ Compile : g++ -O2 -std=c++11 -pthread hello_world.cpp -o hello_world
+	^ Run: ./a.out 
+*/
+
 #include <iostream>
 #include <cstdint> // uint64_t
 #include <vector> // std::vector
