@@ -60,10 +60,10 @@ int main(int argc, char* argv[]) {
    GET_TIME(finish);
    printf("Elapsed time = %e seconds\n", finish - start);
 
-   printf("printing a barrier_thread_counts\n");
-   for(int e = 0 ; e < BARRIER_COUNT; e++){
-      printf("%d -> %d\n", e,barrier_thread_counts[e]);
-   }
+   // printf("printing a barrier_thread_counts\n");
+   // for(int e = 0 ; e < BARRIER_COUNT; e++){
+   //    printf("%d -> %d\n", e,barrier_thread_counts[e]);
+   // }
 
    pthread_mutex_destroy(&barrier_mutex);
    free(thread_handles);

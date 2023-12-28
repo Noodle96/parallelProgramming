@@ -120,7 +120,7 @@ void *Thread_work(void* rank) {
          sem_getvalue(&barrier_sems[i], &value);
 
        // Imprimir el valor del tercer semáforo
-         printf("El valor del semáforo [%d] es: %d\n", i, value);
+         // printf("El valor del semáforo [%d] es: %d\n", i, value);
       } else {
          counter++; // tratar con todos los pthreads
          sem_post(&count_sem);
